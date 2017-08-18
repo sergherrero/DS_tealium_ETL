@@ -55,7 +55,8 @@ def execute_sql_athena(query_str):
                region_name='eu-west-1')
   try:
       with conn.cursor() as cursor:
-          results = cursor.execute(query_str)
+          cursor.execute(query_str)
+          results = cursor.fetchall()
   finally:
       conn.close()
   return results
@@ -64,6 +65,8 @@ def execute_sql_athena(query_str):
 
 import datetime
 
+# Required to access buckets in frankfurt region (pthor buckets)
+sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-central-1.amazonaws.com")
 etl_tealium_events_for_date_range(sqlContext, datetime.date(2017, 8, 4), datetime.date(2017, 8, 4))
 # Make athena aware of the new partitions.
 execute_sql_athena("MSCK REPAIR TABLE pthor_logs.tealium_events;")
